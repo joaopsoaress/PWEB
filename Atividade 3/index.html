@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Privacidade e Segurança</title>
+</head>
+
+<body>
+    <header class="header-1">
+        <nav class="nav bd-grid">
+            <div>
+                <a href="#home" class="nav-logo">Privacidade e Segurança</a>
+            </div>
+            <div class="nav-menu" id="nav-menu">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#home">Início</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="#introduction">Introdução</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="#content1">OAuth2</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="#content2">JWT</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="#content3">XSS</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="#content4">CSRF</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="#conclusion">Conclusão</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="#refs">Referências</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- HOME -->
+        <section class="home bd-grid" id="home">
+            <div class="home-data">
+                <h1 class="home-title">Privacidade e Segurança</h1>
+                <p class="home-text">
+                    Autenticação OAuth, JWT e Segurança contra XSS/CSRF
+                </p>
+                <p class="home-text">
+                    Feito por
+                    <span class="home-text-color">João Pedro Soares da Rosa</span>
+                </p>
+                <p class="home-text">
+                    RA: 0030482511029 — FATEC Sorocaba José Crespo Gonzales
+                </p>
+            </div>
+        </section>
+
+        <!-- INTRODUÇÃO -->
+        <section class="introduction section" id="introduction">
+            <h2 class="section-title">Introdução</h2>
+            <div class="introduction-container bd-grid">
+                <p class="introduction-text">
+                    A segurança e a privacidade de dados são pilares fundamentais no desenvolvimento
+                    de APIs na atualidade, garantindo que apenas usuários autorizados acessem
+                    recursos sensíveis e que as informações transmitidas permaneçam íntegras. Para
+                    alcançar esse objetivo, desenvolvedores de software utilizam uma combinação de
+                    protocolos de autorização, tokens de autenticação e estratégias de defesa contra
+                    ataques comuns na web.<br><br>
+
+                    Este trabalho aborda as principais práticas modernas de segurança em APIs:
+                    o protocolo <b>OAuth2</b> (e suas evoluções com PKCE e a especificação OAuth 2.1),
+                    o padrão <b>JSON Web Token (JWT)</b> para autenticação sem estado, e as defesas
+                    contra os ataques de <b>Cross-Site Scripting (XSS)</b> e
+                    <b>Cross-Site Request Forgery (CSRF)</b>.
+                </p>
+            </div>
+        </section>
+
+        <!-- OAUTH2 -->
+        <section class="content1 section" id="content1">
+            <h2 class="section-title">Autenticação e Autorização com OAuth2</h2>
+            <div class="content1-container bd-grid">
+                <div>
+                    <p class="content1-text">
+                        O <b>OAuth2</b> é o padrão de mercado para autorização. Ele permite que uma
+                        aplicação acesse recursos em nome de um usuário sem que este precise
+                        compartilhar suas credenciais (como senha) diretamente com o serviço de
+                        terceiros.
+                    </p>
+
+                    <h2 class="content1-subtitle">Fluxo de Funcionamento</h2>
+                    <p class="content1-text">
+                        O OAuth2 define papéis específicos — <b>Dono do Recurso</b>, <b>Cliente</b>,
+                        <b>Servidor de Autorização</b> e <b>Servidor de Recursos</b> — e utiliza
+                        <b>scopes</b> para limitar o que cada aplicação pode fazer.
+                    </p>
+
+                    <h2 class="content1-subtitle">Importância</h2>
+                    <p class="content1-text">
+                        É essencial para ecossistemas de APIs onde a interoperabilidade entre
+                        diferentes serviços é necessária de forma segura.
+                    </p>
+
+                    <h2 class="content1-subtitle">OAuth 2.1 e PKCE</h2>
+                    <p class="content1-text">
+                        O OAuth continua evoluindo. Em janeiro de 2025, a IETF publicou a
+                        <b>RFC 9700</b> (<em>Best Current Practice for OAuth 2.0 Security</em>),
+                        consolidando mais de uma década de aprendizados sobre falhas de
+                        implementação. Essas recomendações estão sendo formalizadas na especificação
+                        <b>OAuth 2.1</b>, que traz mudanças relevantes:
+                    </p>
+                    <ul class="content1-list">
+                        <li>
+                            <b>PKCE obrigatório:</b> o <em>Proof Key for Code Exchange</em>
+                            (RFC 7636), antes recomendado apenas para clientes públicos (SPAs, apps
+                            mobile), passa a ser exigido também para clientes confidenciais no fluxo
+                            de <em>Authorization Code</em>. O cliente gera um
+                            <em>code_verifier</em> aleatório, deriva dele um
+                            <em>code_challenge</em> (via SHA-256) e envia na requisição de
+                            autorização. Na troca do código pelo token, precisa apresentar o
+                            verificador original. Isso protege contra interceptação e reuso do
+                            código de autorização (<em>authorization code injection</em>).
+                        </li>
+                        <li>
+                            <b>Fim do fluxo Implícito (<em>Implicit Grant</em>):</b> os tokens não
+                            devem mais trafegar diretamente na URL do navegador, pois ficam expostos
+                            em históricos, logs e cabeçalhos <em>Referer</em>.
+                        </li>
+                        <li>
+                            <b>Tokens de curta duração com rotação:</b> <em>access tokens</em> com
+                            vida útil curta (tipicamente 15–30 minutos) combinados com
+                            <em>refresh tokens</em> que são invalidados e substituídos a cada uso
+                            (rotação), reduzindo a janela de exploração em caso de vazamento.
+                        </li>
+                        <li>
+                            <b>Tokens vinculados ao remetente (<em>sender-constrained tokens</em>):</b>
+                            técnicas como mTLS ou DPoP amarram o token em quem o solicitou, tornando
+                            um token roubado inútil para terceiros.
+                        </li>
+                        <li>
+                            <b>Validação estrita de <em>redirect_uri</em></b> (correspondência
+                            exata, sem <em>wildcards</em>) e uso do parâmetro <em>state</em> para
+                            mitigar CSRF durante o fluxo de autorização.
+                        </li>
+                    </ul>
+                    <p class="content1-text">
+                        Essas práticas são especialmente relevantes hoje porque uma parcela
+                        significativa dos incidentes de segurança em aplicações SaaS está associada
+                        a implementações falhas ou incompletas de OAuth.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- JWT -->
+        <section class="content2 section" id="content2">
+            <h2 class="section-title">JSON Web Token (JWT)</h2>
+            <div class="content2-container bd-grid">
+                <div>
+                    <p class="content2-text">
+                        O <b>JWT</b> é um padrão (RFC 7519) utilizado para transmitir informações de
+                        forma segura entre as partes como um objeto JSON.
+                    </p>
+                    <ul class="content2-list">
+                        <li>
+                            <b>Estrutura:</b> É composto por três partes: <b>Header</b> (algoritmo
+                            e tipo), <b>Payload</b> (dados do usuário ou <em>claims</em>) e
+                            <b>Signature</b> (garante que o token não foi alterado).
+                        </li>
+                        <li>
+                            <b>Vantagens:</b> Por ser autossuficiente e compacto, é ideal para
+                            autenticação sem estado (<em>stateless</em>), eliminando a necessidade
+                            de consultar o banco de dados em cada requisição. Porém, sua segurança
+                            depende da força da chave secreta e de como ele é armazenado no cliente.
+                        </li>
+                    </ul>
+
+                    <h2 class="content2-subtitle">Algoritmos de assinatura e ataques clássicos</h2>
+                    <p class="content2-text">
+                        A escolha e a validação do algoritmo são pontos críticos de segurança:
+                    </p>
+                    <ul class="content2-list">
+                        <li>
+                            <b>Simétrico (HS256):</b> usa uma única chave secreta compartilhada
+                            tanto para assinar quanto para validar o token. Qualquer serviço capaz
+                            de validar também é capaz de emitir novos tokens, o que é arriscado em
+                            arquiteturas com múltiplos microsserviços.
+                        </li>
+                        <li>
+                            <b>Assimétrico (RS256, ES256, EdDSA):</b> usa um par de chaves; a chave
+                            privada assina o token e apenas a chave pública é necessária para
+                            validá-lo. Isso impede que serviços "consumidores" forjem tokens, pois
+                            eles nunca têm acesso à chave privada.
+                        </li>
+                        <li>
+                            <b>Ataque <em>alg: none</em>:</b> a RFC 7519 prevê <em>none</em> como
+                            valor válido para tokens não assinados. Bibliotecas mal configuradas que
+                            confiam no algoritmo informado no próprio cabeçalho do token permitem
+                            que um atacante altere o payload, troque o <em>alg</em> para
+                            <em>none</em>, remova a assinatura e envie um token forjado (por
+                            exemplo, alterando <em>role: user</em> para <em>role: admin</em>).
+                        </li>
+                        <li>
+                            <b>Confusão de algoritmo (RS256 → HS256):</b> quando o servidor aceita
+                            mais de um algoritmo, um atacante pode obter a chave pública RSA
+                            (frequentemente exposta em endpoints como
+                            <em>/.well-known/jwks.json</em>) e usá-la como se fosse o segredo HMAC
+                            para assinar um token falso com HS256. Como o servidor usa a mesma chave
+                            pública para validar, a assinatura "bate".
+                        </li>
+                        <li>
+                            <b>Mitigação:</b> nunca confiar no <em>alg</em> informado pelo token. O
+                            servidor deve fixar/<em>whitelistar</em> explicitamente o algoritmo
+                            esperado (ex.: aceitar somente <code>["RS256"]</code>), usar segredos
+                            HMAC fortes (mínimo de 32 bytes aleatórios quando HS256 for
+                            inevitável), validar sempre as claims <em>exp</em>, <em>iss</em> e
+                            <em>aud</em>, manter bibliotecas JWT atualizadas e monitorar CVEs
+                            conhecidas dessas bibliotecas.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- XSS -->
+        <section class="content3 section" id="content3">
+            <h2 class="section-title">Proteção contra XSS (Cross-Site Scripting)</h2>
+            <div class="content3-container bd-grid">
+                <div>
+                    <p class="content3-text">
+                        O <b>XSS</b> ocorre quando um invasor consegue injetar scripts maliciosos em
+                        páginas web visualizadas por outros usuários.
+                    </p>
+                    <ul class="content3-list">
+                        <li>
+                            <b>Impacto no JWT:</b> Se um JWT for armazenado no
+                            <em>localStorage</em> do navegador, ele fica vulnerável a ataques XSS,
+                            pois qualquer script JavaScript na página pode lê-lo e roubá-lo.
+                        </li>
+                        <li>
+                            <b>Prevenção:</b> As melhores práticas incluem a <b>sanitização de
+                            entradas</b>, o uso de <b>Content Security Policy (CSP)</b> e o
+                            armazenamento de tokens sensíveis em cookies com a flag
+                            <b>HttpOnly</b>, que impede o acesso via JavaScript.
+                        </li>
+                    </ul>
+
+                    <h2 class="content3-subtitle">Reforçando a defesa contra XSS</h2>
+                    <ul class="content3-list">
+                        <li>
+                            <b>Content Security Policy (CSP) na prática:</b> diretivas como
+                            <code>script-src 'self'</code> restringem quais origens podem executar
+                            scripts, bloqueando a maioria dos payloads XSS injetados por terceiros;
+                            o uso de <em>nonces</em> ou hashes
+                            (<code>script-src 'nonce-xyz'</code>) permite liberar apenas scripts
+                            explicitamente autorizados pelo servidor a cada requisição.
+                        </li>
+                        <li>
+                            <b>Sanitização e <em>escaping</em> de saída:</b> além de sanitizar
+                            entradas, é fundamental escapar corretamente qualquer dado do usuário
+                            renderizado no HTML, evitando usar
+                            <em>innerHTML/dangerouslySetInnerHTML</em> com conteúdo não confiável.
+                            Frameworks modernos (React, Vue, Angular) já escapam por padrão, mas
+                            podem ser burlados se contornar essa proteção manualmente.
+                        </li>
+                        <li>
+                            <b>Cookies de sessão/token com atributos combinados:</b> <em>HttpOnly</em>
+                            (bloqueia leitura via JS) + <em>Secure</em> (só trafega em HTTPS) +
+                            <em>SameSite</em> (limita envio entre domínios) formam, juntos, uma
+                            defesa em camadas mais robusta.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- CSRF -->
+        <section class="content4 section" id="content4">
+            <h2 class="section-title">Proteção contra CSRF (Cross-Site Request Forgery)</h2>
+            <div class="content4-container bd-grid">
+                <div>
+                    <p class="content4-text">
+                        O <b>CSRF</b> é um ataque que engana um usuário autenticado para que ele
+                        execute ações indesejadas em uma aplicação na qual ele já possui uma sessão
+                        ativa.
+                    </p>
+                    <ul class="content4-list">
+                        <li>
+                            <b>O Dilema do Armazenamento:</b> Embora cookies com <em>HttpOnly</em>
+                            protejam contra XSS, eles tornam a aplicação vulnerável ao CSRF, pois o
+                            navegador envia automaticamente os cookies em requisições para o domínio
+                            de origem.
+                        </li>
+                        <li>
+                            <b>Prevenção:</b> Para mitigar esse risco, utiliza-se a estratégia de
+                            <b>Tokens Anti-CSRF</b> (um valor único enviado em cada requisição), o
+                            atributo <b>SameSite</b> nos cookies e a validação de cabeçalhos
+                            personalizados em APIs.
+                        </li>
+                    </ul>
+
+                    <h2 class="content4-subtitle">Detalhando o atributo SameSite</h2>
+                    <p class="content4-text">
+                        O atributo <em>SameSite</em> de um cookie controla se ele é enviado em
+                        requisições de origem cruzada (<em>cross-site</em>), e possui três valores
+                        possíveis:
+                    </p>
+                    <ul class="content4-list">
+                        <li>
+                            <b>Strict:</b> o cookie nunca é enviado em navegação vinda de outro
+                            site, a proteção mais forte, mas pode quebrar fluxos legítimos (ex.:
+                            clicar em um link externo que leva a uma página autenticada).
+                        </li>
+                        <li>
+                            <b>Lax</b> (padrão em navegadores modernos): o cookie é enviado em
+                            navegações de nível superior do tipo <em>GET</em> vindas de outro site
+                            (como clicar em um link), mas não em requisições
+                            <em>POST/PUT/DELETE</em> disparadas por formulários ou scripts de
+                            terceiros — bom equilíbrio entre segurança e usabilidade.
+                        </li>
+                        <li>
+                            <b>None:</b> o cookie é sempre enviado entre sites, exigindo
+                            obrigatoriamente o atributo <em>Secure</em> (HTTPS); usado quando a
+                            aplicação depende de cenários legítimos de <em>cross-site</em> (ex.:
+                            <em>widgets</em> embutidos, single sign-on entre domínios).
+                        </li>
+                    </ul>
+
+                    <h2 class="content4-subtitle">Camadas complementares de proteção</h2>
+                    <ul class="content4-list">
+                        <li>
+                            <b>Padrão <em>Double Submit Cookie</em> ou
+                            <em>Synchronizer Token Pattern</em>:</b> o servidor gera um token CSRF
+                            único por sessão (ou por requisição), que deve ser enviado tanto em um
+                            cookie quanto em um cabeçalho/campo de formulário; a requisição só é
+                            aceita se os dois valores coincidirem, algo que um atacante externo não
+                            consegue reproduzir.
+                        </li>
+                        <li>
+                            <b>Validação do cabeçalho Origin/Referer:</b> APIs podem validar se a
+                            requisição realmente partiu do domínio esperado, como camada adicional
+                            (não deve ser a única defesa, pois esses cabeçalhos podem ser omitidos
+                            em certos cenários legítimos).
+                        </li>
+                        <li>
+                            <b>Rate limiting e MFA (autenticação multifator):</b> mesmo não sendo
+                            específicos de CSRF/XSS, limitar tentativas de requisições sensíveis e
+                            exigir um segundo fator de autenticação reduzem o impacto de
+                            credenciais ou tokens comprometidos por qualquer um dos vetores
+                            anteriores.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONCLUSÃO -->
+        <section class="conclusion section" id="conclusion">
+            <h2 class="section-title">Conclusão</h2>
+            <div class="conclusion-container bd-grid">
+                <p class="conclusion-text">
+                    Uma arquitetura segura trabalha mais como uma estratégia em camadas. O OAuth e
+                    o JWT lidam com quem o usuário é e o que ele pode fazer, cada vez mais
+                    reforçados por práticas como PKCE, rotação de tokens e validação estrita de
+                    algoritmos de assinatura. As defesas contra XSS e CSRF garantem que o canal de
+                    comunicação e o ambiente do navegador permaneçam protegidos contra manipulações
+                    externas.<br><br>
+
+                    A combinação dessas camadas (CSP, cookies <em>HttpOnly/Secure/SameSite</em>,
+                    tokens anti-CSRF, PKCE, <em>allowlist</em> de algoritmos JWT, MFA e
+                    monitoramento) é o que efetivamente reduz a superfície de ataque de uma API
+                    moderna.
+                </p>
+            </div>
+        </section>
+
+        <!-- REFERÊNCIAS -->
+        <section class="refs section" id="refs">
+            <h2 class="section-title">Referências Bibliográficas</h2>
+            <div class="refs-container bd-grid">
+                <ul class="refs-list">
+                    <li>
+                        <a href="https://aembit.io/blog/oauth-2-1-guide-migration-security/" target="_blank" rel="noopener noreferrer">
+                            aembit.io — Guia de migração de OAuth 2.0 para 2.1
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.authgear.com/post/oauth2-security-best-practices-pkce-state/" target="_blank" rel="noopener noreferrer">
+                            authgear.com — OAuth2 Security Best Practices (PKCE, state)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://blog.convisoappsec.com/json-web-tokens-dicas-e-ataques-para-uma-implementacao-segura/" target="_blank" rel="noopener noreferrer">
+                            blog.convisoappsec.com — JSON Web Tokens: dicas e ataques para uma implementação segura
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://blog.convisoappsec.com/melhores-praticas-de-desenvolvimento-seguro-em-api-oauth2-e-jwt/" target="_blank" rel="noopener noreferrer">
+                            blog.convisoappsec.com — Melhores práticas de desenvolvimento seguro em API OAuth2 e JWT
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://cursos.alura.com.br/forum/topico-implementacao-segura-de-autenticacao-em-node-js-usando-jwt-cookies-httponly-e-medidas-de-protecao-contra-xss-e-csrf-301171" target="_blank" rel="noopener noreferrer">
+                            cursos.alura.com.br — Implementação segura de autenticação em Node.js com JWT, cookies HttpOnly e proteção contra XSS/CSRF
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://decripte.com.br/conhecimento/jwt-security" target="_blank" rel="noopener noreferrer">
+                            decripte.com.br — JWT Security (ataques alg:none e confusão RS256/HS256)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://dev.to/kimmaida/oauth-20-security-best-practices-for-developers-2ba5" target="_blank" rel="noopener noreferrer">
+                            dev.to — OAuth 2.0 Security Best Practices for Developers (OAuth 2.1, PKCE e RFC 9700)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://dev.to/lariazevedo/seguranca-no-front-end-dos-ataques-a-prevencao-6b0" target="_blank" rel="noopener noreferrer">
+                            dev.to — Segurança no front-end: dos ataques à prevenção
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.dio.me/articles/autenticacao-no-spring-boot-como-implementar-de-forma-simples-e-eficiente" target="_blank" rel="noopener noreferrer">
+                            dio.me — Autenticação no Spring Boot: como implementar de forma simples e eficiente
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://medium.com/@gunawardena.buddika/jwts-csrf-tokens-465e5d4f91cf" target="_blank" rel="noopener noreferrer">
+                            medium.com — JWTs &amp; CSRF Tokens
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.rocketseat.com.br/blog/artigos/post/autenticacao-jwt-guia-proteger-api-nodejs" target="_blank" rel="noopener noreferrer">
+                            rocketseat.com.br — Autenticação JWT: guia para proteger API Node.js
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://stackoverflow.blog/2021/10/06/best-practices-for-authentication-and-authorization-for-rest-apis/" target="_blank" rel="noopener noreferrer">
+                            stackoverflow.blog — Best practices for authentication and authorization for REST APIs
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.vaadata.com/blog/jwt-json-web-token-vulnerabilities-common-attacks-and-security-best-practices/" target="_blank" rel="noopener noreferrer">
+                            vaadata.com — JWT vulnerabilities, common attacks and security best practices
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container bd-grid">
+            <p class="footer-text">
+                Desenvolvido por <span class="footer-author">João Pedro Soares da Rosa</span>
+            </p>
+            <a href="https://github.com/joaopsoaress/" target="_blank" rel="noopener noreferrer" class="footer-github">
+                <svg class="footer-github-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.207 11.387.6.113.793-.26.793-.577v-2.017c-3.338.726-4.042-1.61-4.042-1.61-.546-1.386-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.084 1.84 1.237 1.84 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.42-1.305.762-1.605-2.665-.303-5.467-1.333-5.467-5.93 0-1.31.469-2.381 1。
+        </div>
+    </footer>
+</body>
+
+</html>
